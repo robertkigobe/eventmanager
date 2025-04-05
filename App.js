@@ -11,6 +11,8 @@ import 'react-native-gesture-handler';
 import RegisterScreen from './src/screens/RegisterScreen';
 import CheckinScreen from './src/screens/CheckinScreen';
 import SurveyScreen from './src/screens/SurveyScreen';
+import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
+import ProgramScreen from './src/screens/ProgramScreen';
 
 // BBNAC color theme
 const COLORS = {
@@ -184,7 +186,7 @@ export default function App() {
         />
         <Drawer.Screen 
           name="Programming" 
-          component={ProgrammingScreen} 
+          component={ProgramScreen} 
           options={{
             title: 'Programming',
             drawerLabel: 'Programming',
@@ -226,6 +228,15 @@ export default function App() {
             )
           }}
         />
+        <Drawer.Screen 
+        name="Admin Dashboard" 
+        component={AdminDashboardScreen}
+        options={{
+          drawerIcon: ({color, size}) => (
+            <MaterialIcons name="dashboard" size={size} color={color} />
+          )
+        }}
+      />
       </Drawer.Navigator>
       <StatusBar style="light" />
     </NavigationContainer>
