@@ -104,6 +104,15 @@ function AuthButton({ navigation }) {
   );
 }
 
+// Create a modified AdminDashboardScreen that includes the CheckinScreen
+function EnhancedAdminDashboardScreen({ navigation }) {
+  // We'll create a tabbed interface in the AdminDashboardScreen
+  // that includes the CheckinScreen functionality
+  return (
+    <AdminDashboardScreen checkinScreen={CheckinScreen} navigation={navigation} />
+  );
+}
+
 export default function App() {
   const [isReady, setIsReady] = useState(false);
   
@@ -207,17 +216,6 @@ export default function App() {
           }}
         />
         <Drawer.Screen 
-          name="Checkin" 
-          component={CheckinScreen} 
-          options={{
-            title: 'Check In',
-            drawerLabel: 'Check In',
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="checkmark-circle" size={size} color={color} />
-            )
-          }}
-        />
-        <Drawer.Screen 
           name="Survey" 
           component={SurveyScreen} 
           options={{
@@ -229,14 +227,16 @@ export default function App() {
           }}
         />
         <Drawer.Screen 
-        name="Admin Dashboard" 
-        component={AdminDashboardScreen}
-        options={{
-          drawerIcon: ({color, size}) => (
-            <MaterialIcons name="dashboard" size={size} color={color} />
-          )
-        }}
-      />
+          name="Admin Dashboard" 
+          component={EnhancedAdminDashboardScreen}
+          options={{
+            title: 'Admin Dashboard',
+            drawerLabel: 'Admin Dashboard',
+            drawerIcon: ({color, size}) => (
+              <MaterialIcons name="dashboard" size={size} color={color} />
+            )
+          }}
+        />
       </Drawer.Navigator>
       <StatusBar style="light" />
     </NavigationContainer>
