@@ -13,6 +13,7 @@ import CheckinScreen from './src/screens/CheckinScreen';
 import SurveyScreen from './src/screens/SurveyScreen';
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
 import ProgramScreen from './src/screens/ProgramScreen';
+import MyRegistrationsScreen from './src/screens/MyRegistrationsScreen';
 
 // BBNAC color theme
 const COLORS = {
@@ -212,6 +213,17 @@ export default function App() {
             drawerLabel: 'Register',
             drawerIcon: ({ color, size }) => (
               <MaterialIcons name="app-registration" size={size} color={color} />
+            )
+          }}
+        />
+        <Drawer.Screen 
+          name="MyRegistrations" 
+          component={MyRegistrationsScreen} 
+          options={{
+            title: 'My Registrations',
+            drawerLabel: 'My Registrations',
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="ticket-confirmation" size={size} color={color} />
             )
           }}
         />
