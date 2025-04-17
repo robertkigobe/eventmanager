@@ -12,6 +12,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import 'react-native-gesture-handler';
 
@@ -23,19 +24,11 @@ import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
 import ProgramScreen from './src/screens/ProgramScreen';
 import MyRegistrationsScreen from './src/screens/MyRegistrationsScreen';
 import HomeScreen from './src/screens/HomeScreen';
+import RegistrationDetailsScreen from './src/screens/RegistrationDetailsScreen';
 
-// BBNAC color theme
-const COLORS = {
-  primaryBlue: '#003a70', // Dark navy blue (primary color from BBNAC)
-  secondaryBlue: '#0077c8', // Lighter blue (secondary color from BBNAC)
-  lightBlue: '#e5f1f8', // Very light blue for backgrounds
-  white: '#ffffff',
-  textDark: '#333333',
-  borderColor: '#e1e1e1',
-};
-
-// Create drawer navigator
+// Create navigators
 const Drawer = createDrawerNavigator();
+const Stack = createStackNavigator();
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -93,7 +86,7 @@ function AuthButton({ navigation }) {
       style={styles.authButton} 
       onPress={handleAuthPress}
     >
-      <Ionicons name="person-circle" size={28} color={COLORS.white} />
+      <Ionicons name="person-circle" size={28} color="#ffffff" />
     </TouchableOpacity>
   );
 }
@@ -107,6 +100,117 @@ function EnhancedAdminDashboardScreen({ navigation }) {
   );
 }
 
+// Create the drawer navigator component
+function DrawerNavigator() {
+  return (
+    <Drawer.Navigator 
+      initialRouteName="Home"
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={({ navigation }) => ({
+        headerStyle: {
+          backgroundColor: '#003a70',
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        headerRight: () => <AuthButton navigation={navigation} />,
+        drawerStyle: {
+          backgroundColor: '#ffffff',
+          width: 300,
+        },
+        drawerActiveTintColor: '#0077c8',
+        drawerInactiveTintColor: '#333333',
+        drawerActiveBackgroundColor: '#e5f1f8',
+        drawerItemStyle: {
+          borderRadius: 8,
+          paddingVertical: 5,
+          marginVertical: 4,
+          marginHorizontal: 12,
+        },
+        drawerLabelStyle: {
+          fontSize: 16,
+          fontWeight: '500',
+          marginLeft: 8, // Increased spacing between icon and label
+        },
+        drawerIconStyle: {
+          marginRight: 8, // Added spacing after icon
+        }
+      })}
+    >
+      <Drawer.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{
+          title: 'BBNAC 2025',
+          drawerLabel: 'Home',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          )
+        }}
+      />
+      <Drawer.Screen 
+        name="Programming" 
+        component={ProgramScreen} 
+        options={{
+          title: 'Programming',
+          drawerLabel: 'Programming',
+          drawerIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="calendar-clock" size={size} color={color} />
+          )
+        }}
+      />
+      <Drawer.Screen 
+        name="Register" 
+        component={RegisterScreen} 
+        options={{
+          title: 'Register',
+          drawerLabel: 'Register',
+          drawerIcon: ({ color, size }) => (
+            <MaterialIcons name="app-registration" size={size} color={color} />
+          )
+        }}
+      />
+      <Drawer.Screen 
+        name="MyRegistrations" 
+        component={MyRegistrationsScreen} 
+        options={{
+          title: 'My Registrations',
+          drawerLabel: 'My Registrations',
+          drawerIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="ticket-confirmation" size={size} color={color} />
+          )
+        }}
+      />
+      <Drawer.Screen 
+        name="Survey" 
+        component={SurveyScreen} 
+        options={{
+          title: 'Survey',
+          drawerLabel: 'Survey',
+          drawerIcon: ({ color, size }) => (
+            <FontAwesome5 name="clipboard-list" size={size} color={color} />
+          )
+        }}
+      />
+      <Drawer.Screen 
+        name="Admin Dashboard" 
+        component={EnhancedAdminDashboardScreen}
+        options={{
+          title: 'Admin Dashboard',
+          drawerLabel: 'Admin Dashboard',
+          drawerIcon: ({color, size}) => (
+            <MaterialIcons name="dashboard" size={size} color={color} />
+          )
+        }}
+      />
+    </Drawer.Navigator>
+  );
+}
+
+// Main app component
 export default function App() {
   const [isReady, setIsReady] = useState(false);
   
@@ -137,112 +241,24 @@ export default function App() {
     return null;
   }
 
+  // Use Stack navigator as the root navigator to handle both drawer and standalone screens
   return (
     <NavigationContainer onReady={onLayoutRootView}>
-      <Drawer.Navigator 
-        initialRouteName="Home"
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-        screenOptions={({ navigation }) => ({
-          headerStyle: {
-            backgroundColor: COLORS.primaryBlue,
-            elevation: 0,
-            shadowOpacity: 0,
-          },
-          headerTintColor: COLORS.white,
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          headerRight: () => <AuthButton navigation={navigation} />,
-          drawerStyle: {
-            backgroundColor: COLORS.white,
-            width: 300,
-          },
-          drawerActiveTintColor: COLORS.secondaryBlue,
-          drawerInactiveTintColor: COLORS.textDark,
-          drawerActiveBackgroundColor: COLORS.lightBlue,
-          drawerItemStyle: {
-            borderRadius: 8,
-            paddingVertical: 5,
-            marginVertical: 4,
-            marginHorizontal: 12,
-          },
-          drawerLabelStyle: {
-            fontSize: 16,
-            fontWeight: '500',
-            marginLeft: 8, // Increased spacing between icon and label
-          },
-          drawerIconStyle: {
-            marginRight: 8, // Added spacing after icon
-          }
-        })}
-      >
-        <Drawer.Screen 
-          name="Home" 
-          component={HomeScreen} 
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Main" component={DrawerNavigator} />
+        <Stack.Screen
+          name="RegistrationDetails"
+          component={RegistrationDetailsScreen}
           options={{
-            title: 'BBNAC 2025',
-            drawerLabel: 'Home',
-            drawerIcon: ({ color, size }) => (
-              <Ionicons name="home" size={size} color={color} />
-            )
+            headerShown: true,
+            title: 'Registration Details',
+            headerStyle: {
+              backgroundColor: '#003a70',
+            },
+            headerTintColor: '#ffffff',
           }}
         />
-        <Drawer.Screen 
-          name="Programming" 
-          component={ProgramScreen} 
-          options={{
-            title: 'Programming',
-            drawerLabel: 'Programming',
-            drawerIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="calendar-clock" size={size} color={color} />
-            )
-          }}
-        />
-        <Drawer.Screen 
-          name="Register" 
-          component={RegisterScreen} 
-          options={{
-            title: 'Register',
-            drawerLabel: 'Register',
-            drawerIcon: ({ color, size }) => (
-              <MaterialIcons name="app-registration" size={size} color={color} />
-            )
-          }}
-        />
-        <Drawer.Screen 
-          name="MyRegistrations" 
-          component={MyRegistrationsScreen} 
-          options={{
-            title: 'My Registrations',
-            drawerLabel: 'My Registrations',
-            drawerIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="ticket-confirmation" size={size} color={color} />
-            )
-          }}
-        />
-        <Drawer.Screen 
-          name="Survey" 
-          component={SurveyScreen} 
-          options={{
-            title: 'Survey',
-            drawerLabel: 'Survey',
-            drawerIcon: ({ color, size }) => (
-              <FontAwesome5 name="clipboard-list" size={size} color={color} />
-            )
-          }}
-        />
-        <Drawer.Screen 
-          name="Admin Dashboard" 
-          component={EnhancedAdminDashboardScreen}
-          options={{
-            title: 'Admin Dashboard',
-            drawerLabel: 'Admin Dashboard',
-            drawerIcon: ({color, size}) => (
-              <MaterialIcons name="dashboard" size={size} color={color} />
-            )
-          }}
-        />
-      </Drawer.Navigator>
+      </Stack.Navigator>
       <StatusBar style="light" />
     </NavigationContainer>
   );
@@ -251,7 +267,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -259,13 +275,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: COLORS.primaryBlue,
+    color: '#003a70',
     marginBottom: 10,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.textDark,
+    color: '#333333',
     textAlign: 'center',
   },
   backgroundImage: {
@@ -285,14 +301,14 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 28,
     fontWeight: '500',
-    color: COLORS.primaryBlue,
+    color: '#003a70',
     marginBottom: 10,
     textAlign: 'center',
   },
   conventionTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.secondaryBlue,
+    color: '#0077c8',
     textAlign: 'center',
   },
   authButton: {
@@ -305,7 +321,7 @@ const styles = StyleSheet.create({
   },
   drawerHeader: {
     padding: 20,
-    backgroundColor: COLORS.lightBlue,
+    backgroundColor: '#e5f1f8',
     alignItems: 'center',
   },
   drawerLogo: {
@@ -316,18 +332,18 @@ const styles = StyleSheet.create({
   drawerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: COLORS.primaryBlue,
+    color: '#003a70',
     textAlign: 'center',
   },
   drawerSubtitle: {
     fontSize: 16,
-    color: COLORS.secondaryBlue,
+    color: '#0077c8',
     marginTop: 5,
     textAlign: 'center',
   },
   drawerDivider: {
     height: 1,
-    backgroundColor: COLORS.borderColor,
+    backgroundColor: '#e1e1e1',
     marginVertical: 10,
     marginHorizontal: 15,
   },
@@ -338,29 +354,29 @@ const styles = StyleSheet.create({
   drawerFooter: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: COLORS.borderColor,
+    borderTopColor: '#e1e1e1',
     alignItems: 'center',
   },
   drawerFooterText: {
     fontSize: 14,
-    color: COLORS.textDark,
+    color: '#333333',
     marginBottom: 5,
   },
   drawerFooterVersion: {
     fontSize: 12,
-    color: COLORS.textDark,
+    color: '#333333',
     opacity: 0.7,
   },
   // New styles for enhanced home screen
   homeContainer: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: '#ffffff',
   },
   scrollContent: {
     paddingBottom: 30,
   },
   homeHeader: {
-    backgroundColor: COLORS.primaryBlue,
+    backgroundColor: '#003a70',
     alignItems: 'center',
     paddingTop: 40,
     paddingBottom: 30,
@@ -374,35 +390,35 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 20,
     fontWeight: '500',
-    color: COLORS.lightBlue,
+    color: '#e5f1f8',
     marginBottom: 5,
   },
   conventionTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.white,
+    color: '#ffffff',
     textAlign: 'center',
   },
   conventionDate: {
     fontSize: 18,
-    color: COLORS.lightBlue,
+    color: '#e5f1f8',
     marginTop: 5,
   },
   themeBanner: {
-    backgroundColor: COLORS.secondaryBlue,
+    backgroundColor: '#0077c8',
     padding: 20,
     alignItems: 'center',
   },
   themeTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: COLORS.lightBlue,
+    color: '#e5f1f8',
     marginBottom: 5,
   },
   themeText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.white,
+    color: '#ffffff',
     textAlign: 'center',
   },
   highlightsSection: {
@@ -411,11 +427,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: COLORS.primaryBlue,
+    color: '#003a70',
     marginBottom: 15,
   },
   highlightCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     marginBottom: 20,
     padding: 15,
@@ -425,7 +441,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: COLORS.borderColor,
+    borderColor: '#e1e1e1',
   },
   highlightHeader: {
     flexDirection: 'row',
@@ -435,7 +451,7 @@ const styles = StyleSheet.create({
   highlightTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textDark,
+    color: '#333333',
     marginLeft: 10,
   },
   speakersContainer: {
@@ -455,13 +471,13 @@ const styles = StyleSheet.create({
   speakerName: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: COLORS.textDark,
+    color: '#333333',
     textAlign: 'center',
     marginBottom: 2,
   },
   speakerRole: {
     fontSize: 12,
-    color: COLORS.secondaryBlue,
+    color: '#0077c8',
     textAlign: 'center',
   },
   eventsContainer: {
@@ -472,10 +488,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderColor,
+    borderBottomColor: '#e1e1e1',
   },
   eventDayBadge: {
-    backgroundColor: COLORS.lightBlue,
+    backgroundColor: '#e5f1f8',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 5,
@@ -484,7 +500,7 @@ const styles = StyleSheet.create({
   eventDayText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: COLORS.primaryBlue,
+    color: '#003a70',
   },
   eventDetails: {
     flex: 1,
@@ -492,21 +508,21 @@ const styles = StyleSheet.create({
   eventTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: COLORS.textDark,
+    color: '#333333',
     marginBottom: 3,
   },
   eventTime: {
     fontSize: 14,
-    color: COLORS.secondaryBlue,
+    color: '#0077c8',
   },
   viewAllButton: {
-    backgroundColor: COLORS.lightBlue,
+    backgroundColor: '#e5f1f8',
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',
   },
   viewAllButtonText: {
-    color: COLORS.primaryBlue,
+    color: '#003a70',
     fontWeight: 'bold',
   },
   locationContainer: {
@@ -526,17 +542,17 @@ const styles = StyleSheet.create({
   locationName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textDark,
+    color: '#333333',
     marginBottom: 5,
   },
   locationAddress: {
     fontSize: 14,
-    color: COLORS.textDark,
+    color: '#333333',
     marginBottom: 12,
     textAlign: 'center',
   },
   mapButton: {
-    backgroundColor: COLORS.secondaryBlue,
+    backgroundColor: '#0077c8',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 15,
@@ -544,13 +560,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   mapButtonText: {
-    color: COLORS.white,
+    color: '#ffffff',
     fontWeight: '500',
     marginLeft: 5,
   },
   quickActionsSection: {
     padding: 20,
-    backgroundColor: COLORS.lightBlue,
+    backgroundColor: '#e5f1f8',
   },
   quickActionsGrid: {
     flexDirection: 'row',
@@ -559,7 +575,7 @@ const styles = StyleSheet.create({
   },
   quickActionButton: {
     width: '48%',
-    backgroundColor: COLORS.white,
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     padding: 15,
     alignItems: 'center',
@@ -581,13 +597,13 @@ const styles = StyleSheet.create({
   quickActionText: {
     fontSize: 16,
     fontWeight: '500',
-    color: COLORS.textDark,
+    color: '#333333',
   },
   newsSection: {
     padding: 20,
   },
   newsCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     marginBottom: 15,
     padding: 15,
@@ -597,22 +613,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: COLORS.borderColor,
+    borderColor: '#e1e1e1',
   },
   newsDate: {
     fontSize: 14,
-    color: COLORS.secondaryBlue,
+    color: '#0077c8',
     marginBottom: 5,
   },
   newsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textDark,
+    color: '#333333',
     marginBottom: 8,
   },
   newsExcerpt: {
     fontSize: 14,
-    color: COLORS.textDark,
+    color: '#333333',
     lineHeight: 20,
     marginBottom: 10,
   },
@@ -620,20 +636,20 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   readMoreText: {
-    color: COLORS.secondaryBlue,
+    color: '#0077c8',
     fontWeight: '500',
   },
   footer: {
     padding: 20,
-    backgroundColor: COLORS.primaryBlue,
+    backgroundColor: '#003a70',
     alignItems: 'center',
   },
   footerText: {
-    color: COLORS.lightBlue,
+    color: '#e5f1f8',
     marginBottom: 5,
   },
   footerLink: {
-    color: COLORS.white,
+    color: '#ffffff',
     fontWeight: 'bold',
   },
 });
