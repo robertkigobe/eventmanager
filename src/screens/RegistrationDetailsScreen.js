@@ -1,262 +1,227 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  StyleSheet, 
-  ActivityIndicator,
-  Alert,
-  ScrollView
-} from 'react-native';
-import { registrationService } from '../services/registrationService';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { registrationApi } from '../services/api';
+import { Ionicons } from '@expo/vector-icons';
 
-const RegistrationDetailsScreen = ({ route, navigation }) => {
+// BBNAC color theme
+const COLORS = {
+  primaryBlue: '#003a70', // Dark navy blue
+  secondaryBlue: '#0077c8', // Lighter blue
+  lightBlue: '#e5f1f8', // Very light blue for backgrounds
+  white: '#ffffff',
+  textDark: '#333333',
+};
+
+export default function RegistrationDetailsScreen({ route, navigation }) {
   const { registrationId } = route.params;
   const [registration, setRegistration] = useState(null);
+  const [registrants, setRegistrants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchRegistrationDetails = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch registration details
+        const registrationData = await registrationApi.getRegistration(registrationId);
+        setRegistration(registrationData);
+        
+        // Fetch registrants for this registration
+        const registrantsData = await registrationApi.getRegistrants(registrationId);
+        setRegistrants(registrantsData);
+      } catch (err) {
+        console.error('Failed to fetch registration details:', err);
+        setError('Failed to load registration details. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchRegistrationDetails();
   }, [registrationId]);
-
-  const fetchRegistrationDetails = async () => {
-    try {
-      setLoading(true);
-      const data = await registrationService.getRegistration(registrationId);
-      setRegistration(data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to load registration details');
-      Alert.alert('Error', 'Failed to load registration details');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddRegistrant = () => {
-    navigation.navigate('CreateRegistrant', { registrationId });
-  };
-
-  const handleEditRegistrant = (registrant) => {
-    navigation.navigate('EditRegistrant', { registrantId: registrant.id });
-  };
-
-  const handleDeleteRegistrant = async (registrantId) => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this registrant?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await registrationService.deleteRegistrant(registrantId);
-              // Refresh the registration details
-              fetchRegistrationDetails();
-              Alert.alert('Success', 'Registrant deleted successfully');
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete registrant');
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const renderRegistrantItem = ({ item }) => (
-    <View style={styles.registrantItem}>
-      <View style={styles.registrantInfo}>
-        <Text style={styles.registrantName}>{item.first_name} {item.last_name}</Text>
-        <Text style={styles.registrantDetail}>{item.email}</Text>
-        {item.belt_rank && (
-          <Text style={styles.registrantDetail}>Belt: {item.belt_rank}</Text>
-        )}
-        {item.division && (
-          <Text style={styles.registrantDetail}>Division: {item.division}</Text>
-        )}
-      </View>
-      <View style={styles.registrantActions}>
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.editButton]}
-          onPress={() => handleEditRegistrant(item)}
-        >
-          <Text style={styles.actionButtonText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.deleteButton]}
-          onPress={() => handleDeleteRegistrant(item.id)}
-        >
-          <Text style={styles.actionButtonText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#3498db" />
+        <ActivityIndicator size="large" color={COLORS.secondaryBlue} />
+        <Text style={styles.loadingText}>Loading registration details...</Text>
       </View>
     );
   }
 
-  if (error || !registration) {
+  if (error) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>{error || 'Registration not found'}</Text>
+        <Ionicons name="alert-circle-outline" size={48} color={COLORS.secondaryBlue} />
+        <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity 
-          style={styles.retryButton}
-          onPress={fetchRegistrationDetails}
+          style={styles.retryButton} 
+          onPress={() => navigation.goBack()}
         >
-          <Text style={styles.retryButtonText}>Retry</Text>
+          <Text style={styles.retryButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!registration) {
+    return (
+      <View style={styles.centered}>
+        <Ionicons name="document-outline" size={48} color={COLORS.secondaryBlue} />
+        <Text style={styles.errorText}>Registration not found</Text>
+        <TouchableOpacity 
+          style={styles.retryButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.detailsContainer}>
-        <View style={styles.registrationHeader}>
-          <Text style={styles.teamName}>{registration.team_name}</Text>
-          <View style={[
-            styles.paymentStatusBadge, 
-            { backgroundColor: registration.payment_status === 'paid' ? '#4CAF50' : '#FF9800' }
-          ]}>
-            <Text style={styles.paymentStatusText}>{registration.payment_status}</Text>
-          </View>
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{registration.event_name || 'Unnamed Event'}</Text>
+        <Text style={styles.date}>
+          Registered on: {new Date(registration.registration_date).toLocaleDateString()}
+        </Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Registration Details</Text>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Status:</Text>
+          <Text style={styles.detailValue}>{registration.status || 'Pending'}</Text>
         </View>
-        <View style={styles.registrationDetails}>
-          <Text style={styles.registrationDetail}>Registration ID: {registration.id}</Text>
-          <Text style={styles.registrationDetail}>Date Registered: {registration.datetime_registered}</Text>
-          <Text style={styles.registrationDetail}>Amount: ${parseFloat(registration.amount).toFixed(2)}</Text>
-          <Text style={styles.registrationDetail}>Payment Method: {registration.payment_method}</Text>
-          <Text style={styles.registrationDetail}>Payment Date: {registration.payment_date}</Text>
-          <Text style={styles.registrationDetail}>Invoice: {registration.invoice}</Text>
-          <Text style={styles.registrationDetail}>Order ID: {registration.order_id}</Text>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Event Date:</Text>
+          <Text style={styles.detailValue}>
+            {registration.event_date ? new Date(registration.event_date).toLocaleDateString() : 'Not specified'}
+          </Text>
         </View>
-        <View style={styles.registrationActions}>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={handleAddRegistrant}
-          >
-            <Text style={styles.actionButtonText}>Add Registrant</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList 
-          data={registration.registrants}
-          renderItem={renderRegistrantItem}
-          keyExtractor={item => item.id.toString()}
-          style={styles.registrantsList}
-        />
-      </ScrollView>
-    </View>
+        {/* Add more registration details as needed */}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Registrants ({registrants.length})</Text>
+        {registrants.length === 0 ? (
+          <Text style={styles.emptyText}>No registrants found</Text>
+        ) : (
+          registrants.map((registrant, index) => (
+            <View key={registrant.id} style={styles.registrantCard}>
+              <Text style={styles.registrantName}>
+                {registrant.first_name} {registrant.last_name}
+              </Text>
+              <Text style={styles.registrantDetail}>Email: {registrant.email || 'N/A'}</Text>
+              <Text style={styles.registrantDetail}>Phone: {registrant.phone || 'N/A'}</Text>
+              {/* Add more registrant details as needed */}
+            </View>
+          ))
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.white,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+    backgroundColor: COLORS.white,
   },
-  errorText: {
-    fontSize: 18,
-    color: '#333',
-  },
-  retryButton: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#3498db',
-    borderRadius: 5,
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  detailsContainer: {
+  header: {
+    backgroundColor: COLORS.primaryBlue,
     padding: 20,
   },
-  registrationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  teamName: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.white,
+    marginBottom: 8,
   },
-  paymentStatusBadge: {
-    padding: 5,
-    borderRadius: 5,
-  },
-  paymentStatusText: {
-    color: '#fff',
+  date: {
     fontSize: 14,
+    color: COLORS.white,
+    opacity: 0.8,
   },
-  registrationDetails: {
-    marginBottom: 20,
+  section: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightBlue,
   },
-  registrationDetail: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 5,
-  },
-  registrationActions: {
-    marginBottom: 20,
-  },
-  actionButton: {
-    padding: 10,
-    borderRadius: 5,
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  editButton: {
-    backgroundColor: '#2ecc71',
-  },
-  deleteButton: {
-    backgroundColor: '#e74c3c',
-  },
-  registrantsList: {
-    marginBottom: 20,
-  },
-  registrantItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    marginBottom: 5,
-  },
-  registrantInfo: {
-    flex: 1,
-  },
-  registrantName: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.primaryBlue,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  detailLabel: {
+    width: 100,
+    fontSize: 16,
+    color: COLORS.textDark,
+    fontWeight: '600',
+  },
+  detailValue: {
+    flex: 1,
+    fontSize: 16,
+    color: COLORS.textDark,
+  },
+  registrantCard: {
+    backgroundColor: COLORS.lightBlue,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+  },
+  registrantName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.primaryBlue,
+    marginBottom: 8,
   },
   registrantDetail: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 14,
+    color: COLORS.textDark,
+    marginBottom: 4,
   },
-  registrantActions: {
-    flexDirection: 'row',
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: COLORS.textDark,
+  },
+  errorText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: COLORS.textDark,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.secondaryBlue,
+    borderRadius: 4,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontWeight: '600',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: COLORS.textDark,
+    fontStyle: 'italic',
   },
 });
-
-export default RegistrationDetailsScreen;
-

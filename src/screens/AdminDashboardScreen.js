@@ -30,9 +30,11 @@ const COLORS = {
 
 const { width } = Dimensions.get('window');
 
+
+
 // Mock data for dashboard statistics
 const DASHBOARD_STATS = [
-  { id: '1', title: 'Registered', count: 1250, icon: 'people', color: COLORS.secondaryBlue },
+  { id: '1', title: 'Registered', count: totalRegistrations, icon: 'people', color: COLORS.secondaryBlue },
   { id: '2', title: 'Checked In', count: 875, icon: 'checkmark-circle', color: COLORS.successColor },
   { id: '3', title: 'Surveys', count: 432, icon: 'document-text', color: COLORS.warningColor },
 ];
@@ -48,7 +50,9 @@ const RECENT_ACTIVITIES = [
 
 export default function AdminDashboardScreen({ navigation, checkinScreen: CheckinScreen }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  
+  const [totalRegistrations, setTotalRegistrations] = useState(0);
+  const [checkedInCount, setCheckedInCount] = useState(0);
+  const [surveyCount, setSurveyCount] = useState(0);
   // Render tab bar
   const renderTabBar = () => {
     return (
@@ -105,13 +109,22 @@ export default function AdminDashboardScreen({ navigation, checkinScreen: Checki
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           {DASHBOARD_STATS.map(stat => (
-            <View key={stat.id} style={styles.statCard}>
+            <TouchableOpacity 
+              key={stat.id} 
+              style={styles.statCard}
+              onPress={() => {
+                // Add navigation for the registration stat
+                if (stat.title.includes('Registered') || stat.id === 'registrations') {
+                  navigation.navigate('RegistrationList');
+                }
+              }}
+            >
               <View style={[styles.statIconContainer, { backgroundColor: stat.color }]}>
                 <Ionicons name={stat.icon} size={24} color={COLORS.white} />
               </View>
               <Text style={styles.statCount}>{stat.count}</Text>
               <Text style={styles.statTitle}>{stat.title}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
         
