@@ -1,7 +1,8 @@
 import axios from 'axios'
+import RegistrationDetailsScreen from '../screens/RegistrationDetailsScreen'; // Adjust path as needed
 
 // Base URL of your backend API
-const API_URL = 'https://your-backend-api.com'; // Replace with your actual API URL
+const API_URL = 'The API endpoints based on these tables are done. The swagger is hosted on Render. https://bbnac-app-backend.onrender.com/'; // Replace with your actual API URL
 
 // Create axios instance
 const apiClient = axios.create({

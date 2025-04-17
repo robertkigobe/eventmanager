@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { useNavigation } from '@react-navigation/native';
+import { getCurrentUser } from '../../utils/authService';
 
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
   const navigation = useNavigation();
+  const [currentUser, setCurrentUser] = useState(null);
+  
+  useEffect(() => {
+    const loadUser = async () => {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+    };
+    
+    loadUser();
+  }, []);
   
   return (
     <Tab.Navigator
@@ -33,7 +44,7 @@ const BottomTabNavigator = () => {
         listeners={{
           tabPress: e => {
             // If user is not logged in, prevent default action and navigate to login
-            if (!auth.currentUser) {
+            if (!currentUser) {
               e.preventDefault();
               navigation.navigate('Auth', { screen: 'Login' });
             }
