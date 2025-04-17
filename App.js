@@ -25,7 +25,7 @@ import ProgramScreen from './src/screens/ProgramScreen';
 import MyRegistrationsScreen from './src/screens/MyRegistrationsScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import RegistrationDetailsScreen from './src/screens/RegistrationDetailsScreen';
-
+import RegistrationListScreen from './src/screens/RegistrationListScreen'; 
 // Create navigators
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -196,11 +196,11 @@ function DrawerNavigator() {
         }}
       />
       <Drawer.Screen 
-        name="Admin Dashboard" 
+        name="Registration Committee" 
         component={EnhancedAdminDashboardScreen}
         options={{
-          title: 'Admin Dashboard',
-          drawerLabel: 'Admin Dashboard',
+          title: 'Registration Committee',
+          drawerLabel: 'Registration Committee',
           drawerIcon: ({color, size}) => (
             <MaterialIcons name="dashboard" size={size} color={color} />
           )
@@ -252,6 +252,18 @@ export default function App() {
           options={{
             headerShown: true,
             title: 'Registration Details',
+            headerStyle: {
+              backgroundColor: '#003a70',
+            },
+            headerTintColor: '#ffffff',
+          }}
+        />
+        <Stack.Screen
+          name="RegistrationList"
+          component={RegistrationListScreen}
+          options={{
+            headerShown: true,
+            title: 'Registrations',
             headerStyle: {
               backgroundColor: '#003a70',
             },
