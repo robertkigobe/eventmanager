@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { auth } from '../../firebase';
+import { auth } from '../firebase';
 
 // Base URL of your backend API
 const API_URL = 'https://your-backend-api.com'; // Replace with your actual API URL
@@ -37,7 +37,7 @@ export const registrationApi = {
   // Get all registrations
   getRegistrations: async () => {
     try {
-      const response = await apiClient.get('/registrations/');
+      const response = await apiClient.get('/bbnac25/registrants/');
       return response.data;
     } catch (error) {
       console.error('Error fetching registrations:', error);

@@ -1,5 +1,5 @@
 // API configuration
-export const API_BASE_URL = 'The API endpoints based on these tables are done. The swagger is hosted on Render. https://bbnac-app-backend.onrender.com'; // Replace with your actual API URL
+export const API_BASE_URL = 'https://bbnac-app-backend.onrender.com'; // Correct API URL
 
 // For development, you might want to use a local URL:
 // export const API_BASE_URL = 'http://localhost:8000';

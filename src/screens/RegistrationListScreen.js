@@ -42,6 +42,11 @@ export default function RegistrationListScreen({ navigation }) {
       setLoading(true);
       setError(null);
       const data = await registrationApi.getRegistrations();
+      
+      // Debug: Log the first item to see its structure
+      if (data && data.length > 0) {
+        console.log('Sample registration data:', JSON.stringify(data[0], null, 2));
+      }
           
       setTotalRegistrations(data.length);
       
@@ -98,7 +103,9 @@ export default function RegistrationListScreen({ navigation }) {
       const lowercaseQuery = query.toLowerCase();
       result = result.filter(item => {
         if (field === 'email' || field === 'both') {
-          if (item.email && item.email.toLowerCase().includes(lowercaseQuery)) {
+          // Check multiple possible email field names
+          const email = item.email || item.registrant_email || item.user_email || '';
+          if (email.toLowerCase().includes(lowercaseQuery)) {
             return true;
           }
         }
@@ -157,45 +164,53 @@ export default function RegistrationListScreen({ navigation }) {
     setSearchQuery('');
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.card}
-      onPress={() => navigation.navigate('RegistrationDetails', { registrationId: item.id })}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>Registration #{item.id}</Text>
-        <Text style={styles.dateText}>
-          {(item.datetime_registered || item.registration_date) 
-            ? new Date(item.datetime_registered || item.registration_date).toLocaleDateString() 
-            : 'No date'}
-        </Text>
-      </View>
-      <View style={styles.cardBody}>
-        <Text style={styles.infoText}>Email: {item.email || 'N/A'}</Text>
-        <Text style={styles.infoText}>Phone: {item.phone || 'N/A'}</Text>
-        <Text style={styles.infoText}>
-          Location: {item.city || 'N/A'}, {item.state || 'N/A'}
-        </Text>
-        <Text style={styles.infoText}>
-          Registered: {
-            (item.datetime_registered || item.registration_date)
-              ? new Date(item.datetime_registered || item.registration_date).toLocaleDateString() + ' ' + 
-                new Date(item.datetime_registered || item.registration_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-              : 'N/A'
-          }
-        </Text>
-      </View>
-      <View style={styles.cardFooter}>
-        <TouchableOpacity 
-          style={styles.detailsButton}
-          onPress={() => navigation.navigate('RegistrationDetails', { registrationId: item.id })}
-        >
-          <Text style={styles.detailsButtonText}>View Details</Text>
-          <Ionicons name="chevron-forward" size={16} color={COLORS.secondaryBlue} />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    // Try to get email from different possible field names
+    const email = item.email || item.registrant_email || item.user_email || 'N/A';
+    
+    return (
+      <TouchableOpacity 
+        style={styles.card}
+        onPress={() => navigation.navigate('RegistrationDetails', { registrationId: item.id })}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle}>Registration #{item.id}</Text>
+          <Text style={styles.dateText}>
+            {(item.datetime_registered || item.registration_date) 
+              ? new Date(item.datetime_registered || item.registration_date).toLocaleDateString() 
+              : 'No date'}
+          </Text>
+        </View>
+        <View style={styles.cardBody}>
+          <Text style={styles.infoText}>
+            Name: {item.first_name || ''} {item.middle_name || ''} {item.last_name || ''}
+          </Text>
+          <Text style={styles.infoText}>Email: {email}</Text>
+          <Text style={styles.infoText}>Phone: {item.phone || 'N/A'}</Text>
+          <Text style={styles.infoText}>
+            Location: {item.city || 'N/A'}, {item.state || 'N/A'}
+          </Text>
+          <Text style={styles.infoText}>
+            Registered: {
+              (item.datetime_registered || item.registration_date)
+                ? new Date(item.datetime_registered || item.registration_date).toLocaleDateString() + ' ' + 
+                  new Date(item.datetime_registered || item.registration_date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                : 'N/A'
+            }
+          </Text>
+        </View>
+        <View style={styles.cardFooter}>
+          <TouchableOpacity 
+            style={styles.detailsButton}
+            onPress={() => navigation.navigate('RegistrationDetails', { registrationId: item.id })}
+          >
+            <Text style={styles.detailsButtonText}>View Details</Text>
+            <Ionicons name="chevron-forward" size={16} color={COLORS.secondaryBlue} />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (loading && !refreshing) {
     return (

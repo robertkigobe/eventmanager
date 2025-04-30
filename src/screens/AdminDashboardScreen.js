@@ -34,7 +34,7 @@ const { width } = Dimensions.get('window');
 
 // Mock data for dashboard statistics
 const DASHBOARD_STATS = [
-  { id: '1', title: 'Registered', count: totalRegistrations, icon: 'people', color: COLORS.secondaryBlue },
+  { id: '1', title: 'Registered', count: 1250, icon: 'people', color: COLORS.secondaryBlue },
   { id: '2', title: 'Checked In', count: 875, icon: 'checkmark-circle', color: COLORS.successColor },
   { id: '3', title: 'Surveys', count: 432, icon: 'document-text', color: COLORS.warningColor },
 ];
