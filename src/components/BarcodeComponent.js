@@ -7,7 +7,8 @@ import {
   Share, 
   Alert,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  Platform
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
@@ -31,10 +32,11 @@ const COLORS = {
 
 export default function BarcodeComponent({ registration, onClose }) {
   const [generating, setGenerating] = useState(false);
+  const [qrRef, setQrRef] = useState(null);
 
   // Generate HTML for the ticket
   const generateTicketHTML = () => {
-    const isConfirmed = registration.status === 'Confirmed';
+    const isConfirmed = registration.status === 'Confirmed' || registration.status === 'Paid';
     const statusColor = isConfirmed ? COLORS.successColor : COLORS.warningColor;
     
     return `
@@ -138,7 +140,11 @@ export default function BarcodeComponent({ registration, onClose }) {
               </div>
               
               <div class="barcode-container">
-                <img class="barcode" src="https://barcode.tec-it.com/barcode.ashx?data=${registration.ticketNumber}&code=Code128&multiplebarcodes=false&translate-esc=false&unit=Fit&dpi=96&imagetype=Gif&rotation=0&color=%23000000&bgcolor=%23ffffff&codepage=&qunit=Mm&quiet=0" alt="Barcode">
+                <img class="barcode" src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(JSON.stringify({
+                  ticketNumber: registration.ticketNumber,
+                  registrantName: registration.registrantName,
+                  eventName: registration.eventName
+                }))}&size=200x200" alt="QR Code">
                 <div style="margin-top: 10px; font-size: 16px;">${registration.ticketNumber}</div>
               </div>
             </div>
@@ -185,6 +191,28 @@ export default function BarcodeComponent({ registration, onClose }) {
     }
   };
 
+  // Print the ticket directly
+  const printTicket = async () => {
+    try {
+      setGenerating(true);
+      
+      // Generate HTML
+      const html = generateTicketHTML();
+      
+      // Print
+      await Print.printAsync({
+        html,
+        printerUrl: Platform.OS === 'ios' ? undefined : null, // Only for iOS
+      });
+      
+    } catch (error) {
+      Alert.alert('Error', 'Failed to print ticket');
+      console.error(error);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -216,7 +244,7 @@ export default function BarcodeComponent({ registration, onClose }) {
               <Text style={styles.infoLabel}>Status</Text>
               <View style={[
                 styles.statusBadge, 
-                { backgroundColor: registration.status === 'Confirmed' ? COLORS.successColor : COLORS.warningColor }
+                { backgroundColor: registration.status === 'Confirmed' || registration.status === 'Paid' ? COLORS.successColor : COLORS.warningColor }
               ]}>
                 <Text style={styles.statusText}>{registration.status}</Text>
               </View>
@@ -224,10 +252,15 @@ export default function BarcodeComponent({ registration, onClose }) {
             
             <View style={styles.barcodeSection}>
               <QRCode
-                value={registration.ticketNumber}
+                value={JSON.stringify({
+                  ticketNumber: registration.ticketNumber,
+                  registrantName: registration.registrantName,
+                  eventName: registration.eventName
+                })}
                 size={200}
                 color={COLORS.textDark}
                 backgroundColor={COLORS.white}
+                getRef={(ref) => setQrRef(ref)}
               />
               <Text style={styles.barcodeText}>{registration.ticketNumber}</Text>
             </View>
@@ -246,6 +279,21 @@ export default function BarcodeComponent({ registration, onClose }) {
               <>
                 <Ionicons name="share-outline" size={20} color={COLORS.white} />
                 <Text style={styles.actionButtonText}>Share Ticket</Text>
+              </>
+            )}
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.actionButton, { marginTop: 12, backgroundColor: COLORS.primaryBlue }]}
+            onPress={printTicket}
+            disabled={generating}
+          >
+            {generating ? (
+              <ActivityIndicator size="small" color={COLORS.white} />
+            ) : (
+              <>
+                <Ionicons name="print" size={20} color={COLORS.white} />
+                <Text style={styles.actionButtonText}>Print Ticket</Text>
               </>
             )}
           </TouchableOpacity>
