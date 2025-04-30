@@ -9,10 +9,6 @@ import {
   Image,
   StatusBar,
   SafeAreaView,
-  Platform,
-  ScrollView,
-  DayTabs,
-  Header,
   Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,253 +28,6 @@ const COLORS = {
   red: '#e53935',
 };
 
-// Dummy data for program sessions
-const DUMMY_SESSIONS = [
-  // Day 1 - Thursday
-  {
-    id: '1',
-    title: 'Opening Ceremony',
-    description: 'Welcome address and introduction to the convention theme',
-    speaker: 'Dr. James Wilson',
-    speakerTitle: 'BBNAC President',
-    speakerImage: 'https://randomuser.me/api/portraits/men/32.jpg',
-    day: 'Thursday',
-    date: '2025-06-12',
-    startTime: '09:00',
-    endTime: '10:30',
-    location: 'Main Auditorium',
-    track: 'General',
-  },
-  {
-    id: '2',
-    title: 'The Future of Baptist Education',
-    description: 'Exploring new approaches to theological education in the digital age',
-    speaker: 'Dr. Sarah Johnson',
-    speakerTitle: 'Dean of Education, Baptist Seminary',
-    speakerImage: 'https://randomuser.me/api/portraits/women/44.jpg',
-    day: 'Thursday',
-    date: '2025-06-12',
-    startTime: '11:00',
-    endTime: '12:30',
-    location: 'Room A',
-    track: 'Education',
-  },
-  {
-    id: '3',
-    title: 'Lunch Break',
-    description: 'Networking lunch with regional groups',
-    speaker: '',
-    speakerTitle: '',
-    speakerImage: '',
-    day: 'Thursday',
-    date: '2025-06-12',
-    startTime: '12:30',
-    endTime: '14:00',
-    location: 'Dining Hall',
-    track: 'Break',
-  },
-  {
-    id: '4',
-    title: 'Modern Worship Workshop',
-    description: 'Hands-on workshop exploring contemporary worship styles and techniques',
-    speaker: 'Pastor Michael Brown',
-    speakerTitle: 'Worship Director, Grace Baptist Church',
-    speakerImage: 'https://randomuser.me/api/portraits/men/22.jpg',
-    day: 'Thursday',
-    date: '2025-06-12',
-    startTime: '14:00',
-    endTime: '15:30',
-    location: 'Room B',
-    track: 'Worship',
-  },
-  {
-    id: '5',
-    title: 'Community Outreach Strategies',
-    description: 'Effective methods for engaging with your local community',
-    speaker: 'Rev. Emily Davis',
-    speakerTitle: 'Outreach Coordinator, First Baptist',
-    speakerImage: 'https://randomuser.me/api/portraits/women/28.jpg',
-    day: 'Thursday',
-    date: '2025-06-12',
-    startTime: '16:00',
-    endTime: '17:30',
-    location: 'Room C',
-    track: 'Outreach',
-  },
-  {
-    id: '6',
-    title: 'Evening Worship Service',
-    description: 'Worship service with special guest choir',
-    speaker: 'Rev. Thomas Clark',
-    speakerTitle: 'Senior Pastor, Calvary Baptist',
-    speakerImage: 'https://randomuser.me/api/portraits/men/52.jpg',
-    day: 'Thursday',
-    date: '2025-06-12',
-    startTime: '19:00',
-    endTime: '21:00',
-    location: 'Main Auditorium',
-    track: 'Worship',
-  },
-  
-  // Day 2 - Friday
-  {
-    id: '7',
-    title: 'Morning Prayer',
-    description: 'Guided prayer and devotional',
-    speaker: 'Pastor Robert Wilson',
-    speakerTitle: 'Prayer Ministry Director',
-    speakerImage: 'https://randomuser.me/api/portraits/men/42.jpg',
-    day: 'Friday',
-    date: '2025-06-13',
-    startTime: '08:00',
-    endTime: '08:45',
-    location: 'Chapel',
-    track: 'Spiritual',
-  },
-  {
-    id: '8',
-    title: 'Digital Ministry in the 21st Century',
-    description: 'Leveraging technology for effective ministry and outreach',
-    speaker: 'Mark Thompson',
-    speakerTitle: 'Digital Strategist, Baptist Media',
-    speakerImage: 'https://randomuser.me/api/portraits/men/64.jpg',
-    day: 'Friday',
-    date: '2025-06-13',
-    startTime: '09:00',
-    endTime: '10:30',
-    location: 'Room A',
-    track: 'Technology',
-  },
-  {
-    id: '9',
-    title: 'Youth Ministry Panel Discussion',
-    description: 'Engaging the next generation: challenges and opportunities',
-    speaker: 'Panel of Youth Leaders',
-    speakerTitle: '',
-    speakerImage: '',
-    day: 'Friday',
-    date: '2025-06-13',
-    startTime: '11:00',
-    endTime: '12:30',
-    location: 'Room B',
-    track: 'Youth',
-  },
-  {
-    id: '10',
-    title: 'Lunch Break',
-    description: 'Networking lunch with interest groups',
-    speaker: '',
-    speakerTitle: '',
-    speakerImage: '',
-    day: 'Friday',
-    date: '2025-06-13',
-    startTime: '12:30',
-    endTime: '14:00',
-    location: 'Dining Hall',
-    track: 'Break',
-  },
-  {
-    id: '11',
-    title: 'Baptist History and Heritage',
-    description: 'Exploring our roots and their relevance today',
-    speaker: 'Dr. Jennifer Adams',
-    speakerTitle: 'Professor of Baptist Studies',
-    speakerImage: 'https://randomuser.me/api/portraits/women/36.jpg',
-    day: 'Friday',
-    date: '2025-06-13',
-    startTime: '14:00',
-    endTime: '15:30',
-    location: 'Room C',
-    track: 'History',
-  },
-  {
-    id: '12',
-    title: 'Pastoral Care in Crisis',
-    description: 'Supporting congregants through personal and community crises',
-    speaker: 'Dr. Samuel Green',
-    speakerTitle: 'Pastoral Counselor',
-    speakerImage: 'https://randomuser.me/api/portraits/men/76.jpg',
-    day: 'Friday',
-    date: '2025-06-13',
-    startTime: '16:00',
-    endTime: '17:30',
-    location: 'Room A',
-    track: 'Pastoral',
-  },
-  
-  // Day 3 - Saturday
-  {
-    id: '13',
-    title: 'Morning Worship',
-    description: 'Praise and worship to start the day',
-    speaker: 'Worship Team',
-    speakerTitle: '',
-    speakerImage: '',
-    day: 'Saturday',
-    date: '2025-06-14',
-    startTime: '08:30',
-    endTime: '09:30',
-    location: 'Main Auditorium',
-    track: 'Worship',
-  },
-  {
-    id: '14',
-    title: 'Missions in a Changing World',
-    description: 'Adapting mission strategies for global challenges',
-    speaker: 'Rev. Maria Rodriguez',
-    speakerTitle: 'International Mission Board',
-    speakerImage: 'https://randomuser.me/api/portraits/women/68.jpg',
-    day: 'Saturday',
-    date: '2025-06-14',
-    startTime: '10:00',
-    endTime: '11:30',
-    location: 'Room B',
-    track: 'Missions',
-  },
-  {
-    id: '15',
-    title: 'Church Leadership Summit',
-    description: 'Developing effective leadership teams in your church',
-    speaker: 'Dr. William Parker',
-    speakerTitle: 'Leadership Consultant',
-    speakerImage: 'https://randomuser.me/api/portraits/men/92.jpg',
-    day: 'Saturday',
-    date: '2025-06-14',
-    startTime: '10:00',
-    endTime: '11:30',
-    location: 'Room A',
-    track: 'Leadership',
-  },
-  {
-    id: '16',
-    title: 'Lunch Break',
-    description: 'Final networking lunch',
-    speaker: '',
-    speakerTitle: '',
-    speakerImage: '',
-    day: 'Saturday',
-    date: '2025-06-14',
-    startTime: '12:00',
-    endTime: '13:30',
-    location: 'Dining Hall',
-    track: 'Break',
-  },
-  {
-    id: '17',
-    title: 'Closing Session',
-    description: 'Reflection on the convention and vision for the future',
-    speaker: 'Dr. James Wilson',
-    speakerTitle: 'BBNAC President',
-    speakerImage: 'https://randomuser.me/api/portraits/men/32.jpg',
-    day: 'Saturday',
-    date: '2025-06-14',
-    startTime: '14:00',
-    endTime: '16:00',
-    location: 'Main Auditorium',
-    track: 'General',
-  },
-];
-
 // Track colors for visual differentiation
 const TRACK_COLORS = {
   'General': '#6a7fc8',
@@ -293,9 +42,102 @@ const TRACK_COLORS = {
   'Pastoral': '#3f51b5',
   'Missions': '#f44336',
   'Leadership': '#ffc107',
+  'Meal': '#ff5722',
+  'Registration': '#607d8b',
+  'Clan': '#673ab7',
+  'Tour': '#009688',
+  'Children': '#cddc39',
+  'Ceremony': '#3f51b5',
+  'Entertainment': '#9c27b0',
+  'Fitness': '#ff5722',
+  'Plenary': '#2196f3',
+  'Cultural': '#ff4081',
 };
 
-const { width } = Dimensions.get('window');
+// Program data for BBNAC'25
+const PROGRAM_SESSIONS = [
+  // Day 1 - Friday, May 23, 2025
+  {
+    id: '1',
+    title: 'Breakfast',
+    description: 'Breakfast on your own',
+    speaker: '',
+    speakerTitle: '',
+    speakerImage: '',
+    day: 'Friday',
+    date: '2025-05-23',
+    startTime: '06:30',
+    endTime: '09:00',
+    location: 'Various',
+    track: 'Meal',
+  },
+  {
+    id: '2',
+    title: 'Check-in of Registered Delegates',
+    description: 'Registration and check-in for all convention delegates',
+    speaker: '',
+    speakerTitle: '',
+    speakerImage: '',
+    day: 'Friday',
+    date: '2025-05-23',
+    startTime: '09:00',
+    endTime: '21:00',
+    location: 'TBA',
+    track: 'Registration',
+  },
+  // Add more Friday sessions here
+  
+  // Day 2 - Saturday, May 24, 2025
+  {
+    id: '17',
+    title: 'Dduyiro (Physical Fitness)',
+    description: '\'Buganda Yeetaaga Abantu Abalamu\' session with the Katikkiro',
+    speaker: 'Katikkiro',
+    speakerTitle: '',
+    speakerImage: '',
+    day: 'Saturday',
+    date: '2025-05-24',
+    startTime: '06:00',
+    endTime: '06:40',
+    location: 'Gym',
+    track: 'Fitness',
+  },
+  // Add more Saturday sessions here
+  
+  // Day 3 - Sunday, May 25, 2025
+  {
+    id: '62',
+    title: 'Ssaabasajja Kabaka 70th Birthday Run/Walk',
+    description: 'Physical activity to celebrate Kabaka\'s birthday',
+    speaker: '',
+    speakerTitle: '',
+    speakerImage: '',
+    day: 'Sunday',
+    date: '2025-05-25',
+    startTime: '06:30',
+    endTime: '08:00',
+    location: 'Gym/TBA',
+    track: 'Fitness',
+  },
+  // Add more Sunday sessions here
+  
+  // Day 4 - Monday, May 26, 2025
+  {
+    id: '86',
+    title: 'Breakfast and Farewell',
+    description: 'Breakfast on your own and farewell',
+    speaker: '',
+    speakerTitle: '',
+    speakerImage: '',
+    day: 'Monday',
+    date: '2025-05-26',
+    startTime: '07:00',
+    endTime: '09:00',
+    location: 'Various',
+    track: 'Meal',
+  },
+  // Add more Monday sessions here
+];
 
 // Create a separate component for session items
 const SessionItem = React.memo(({ item, index, isActive, isExpanded, selectedDay, pulseAnim, onToggleExpand }) => {
@@ -409,7 +251,7 @@ const SessionItem = React.memo(({ item, index, isActive, isExpanded, selectedDay
 });
 
 export default function ProgramScreen() {
-  const [selectedDay, setSelectedDay] = useState('Thursday');
+  const [selectedDay, setSelectedDay] = useState('Friday');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [pulseAnim] = useState(new Animated.Value(1));
   const [expandedSession, setExpandedSession] = useState(null);
@@ -417,14 +259,9 @@ export default function ProgramScreen() {
   
   // Animation values
   const scrollY = useRef(new Animated.Value(0)).current;
-  const headerScale = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0.9],
-    extrapolate: 'clamp'
-  });
   
   // Filter sessions by selected day
-  const filteredSessions = DUMMY_SESSIONS.filter(
+  const filteredSessions = PROGRAM_SESSIONS.filter(
     session => session.day === selectedDay
   );
 
@@ -488,7 +325,7 @@ export default function ProgramScreen() {
 
   // Render day tabs
   const renderDayTabs = () => {
-    const days = ['Thursday', 'Friday', 'Saturday'];
+    const days = ['Friday', 'Saturday', 'Sunday', 'Monday']; 
     
     return (
       <View style={styles.dayTabsContainer}>
@@ -519,7 +356,7 @@ export default function ProgramScreen() {
     );
   };
 
-  // Simplified renderSessionItem function that doesn't use hooks
+  // Render session item
   const renderSessionItem = ({ item, index }) => {
     const isActive = isSessionActive(item);
     const isExpanded = expandedSession === item.id;
@@ -607,172 +444,68 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 2,
   },
   dayTab: {
     flex: 1,
-    paddingVertical: 15,
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
   dayTabActive: {
-    backgroundColor: COLORS.white,
+    borderBottomColor: COLORS.primaryBlue,
   },
   dayTabText: {
     fontSize: 16,
-    color: COLORS.textDark,
+    fontWeight: 'bold',
   },
   dayTabTextActive: {
     color: COLORS.primaryBlue,
-    fontWeight: 'bold',
-  },
-  dayTabIndicator: {
-    position: 'absolute',
-    bottom: 0,
-    height: 3,
-    width: '50%',
-    backgroundColor: COLORS.primaryBlue,
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
   },
   sessionsList: {
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   sessionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    padding: 12,
     backgroundColor: COLORS.white,
     borderRadius: 8,
-    marginBottom: 12,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  sessionHeader: {
-    padding: 16,
-  },
-  sessionTimeLocation: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
+    elevation: 1,
   },
   sessionTime: {
-    fontSize: 14,
-    color: COLORS.secondaryBlue,
-    marginLeft: 4,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 12,
+    width: 80,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sessionLocation: {
-    fontSize: 14,
-    color: COLORS.secondaryBlue,
-    marginLeft: 4,
-  },
-  sessionMain: {
-    marginBottom: 8,
-  },
-  sessionTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+  sessionDetails: {
+    flex: 1,
   },
   sessionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textDark,
-    flex: 1,
+    marginBottom: 4,
   },
-  liveIndicator: {
-    backgroundColor: COLORS.red,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginLeft: 8,
+  sessionSpeaker: {
+    fontSize: 16,
+    marginBottom: 2,
   },
-  liveIndicatorText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  speakerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  speakerImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    marginRight: 8,
-  },
-  speakerImagePlaceholder: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: COLORS.secondaryBlue,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  speakerInfo: {
-    flex: 1,
-  },
-  speakerName: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: COLORS.textDark,
-  },
-  speakerTitle: {
-    fontSize: 13,
-    color: COLORS.textDark,
-    opacity: 0.7,
-  },
-  trackBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: COLORS.lightBlue,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  trackText: {
-    fontSize: 12,
-    color: COLORS.primaryBlue,
-    fontWeight: '500',
-  },
-  expandIcon: {
-    position: 'absolute',
-    right: 16,
-    top: 16,
-  },
-  sessionDetails: {
-    padding: 16,
-    backgroundColor: COLORS.lightBlue,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderColor,
-  },
-  sessionDescription: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: COLORS.textDark,
+  sessionLocation: {
+    fontSize: 14,
+    color: COLORS.gray,
   },
   emptyContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 40,
   },
   emptyText: {
-    marginTop: 16,
     fontSize: 16,
-    color: COLORS.textDark,
-    textAlign: 'center',
+    color: COLORS.gray,
+    marginTop: 16,
   },
 });
