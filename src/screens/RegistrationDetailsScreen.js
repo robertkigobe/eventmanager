@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert
+} from 'react-native';
+import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { registrationApi } from '../services/api';
-import { Ionicons } from '@expo/vector-icons';
+import BarcodeComponent from '../components/BarcodeComponent';
 
 // BBNAC color theme
 const COLORS = {
@@ -10,38 +19,106 @@ const COLORS = {
   lightBlue: '#e5f1f8', // Very light blue for backgrounds
   white: '#ffffff',
   textDark: '#333333',
+  gray: '#757575',
+  lightGray: '#e1e1e1',
+  successColor: '#388e3c',
+  warningColor: '#f57c00',
+  errorColor: '#d32f2f',
 };
 
 export default function RegistrationDetailsScreen({ route, navigation }) {
   const { registrationId } = route.params;
   const [registration, setRegistration] = useState(null);
-  const [registrants, setRegistrants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showBarcode, setShowBarcode] = useState(false);
+  const [ticketData, setTicketData] = useState(null);
 
   useEffect(() => {
-    const fetchRegistrationDetails = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch registration details
-        const registrationData = await registrationApi.getRegistration(registrationId);
-        setRegistration(registrationData);
-        
-        // Fetch registrants for this registration
-        const registrantsData = await registrationApi.getRegistrants(registrationId);
-        setRegistrants(registrantsData);
-      } catch (err) {
-        console.error('Failed to fetch registration details:', err);
-        setError('Failed to load registration details. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRegistrationDetails();
-  }, [registrationId]);
+  }, []);
+
+  const fetchRegistrationDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Use the correct endpoint for fetching registration details
+      const data = await registrationApi.getRegistrant(registrationId);
+      
+      // Log the response for debugging
+      console.log('Registration details:', JSON.stringify(data, null, 2));
+      
+      setRegistration(data);
+    } catch (err) {
+      console.error('Failed to fetch registration details:', err);
+      setError('Failed to load registration details. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    if (!status) return COLORS.gray;
+    
+    status = status.toLowerCase();
+    if (status === 'confirmed' || status === 'paid' || status === 'completed') {
+      return COLORS.successColor;
+    } else if (status === 'pending' || status === 'in progress') {
+      return COLORS.warningColor;
+    } else if (status === 'cancelled' || status === 'failed') {
+      return COLORS.errorColor;
+    }
+    return COLORS.gray;
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return 'N/A';
+    return `$${parseFloat(amount).toFixed(2)}`;
+  };
+
+  const handleViewTicket = () => {
+    if (!registration) return;
+    
+    // Create ticket data from registration
+    const newTicketData = {
+      eventName: "BBNAC Convention 2025",
+      ticketNumber: `BBNAC-${registration.id}`,
+      registrantName: `${registration.first_name} ${registration.middle_name || ''} ${registration.last_name}`.trim(),
+      registrationType: registration.age_group || 'General',
+      registrationDate: formatDate(registration.paymt_date || registration.registration_date),
+      status: registration.status || 'Pending'
+    };
+    
+    setTicketData(newTicketData);
+    setShowBarcode(true);
+  };
+
+  const handleGenerateQRCode = () => {
+    if (!registration) return;
+    
+    // Create QR code data from registration
+    // You can customize what data goes into the QR code
+    const qrData = {
+      eventName: "BBNAC Convention 2025",
+      ticketNumber: `BBNAC-${registration.id}`,
+      registrantName: `${registration.first_name} ${registration.middle_name || ''} ${registration.last_name}`.trim(),
+      registrationType: registration.age_group || 'General',
+      registrationDate: formatDate(registration.paymt_date || registration.registration_date),
+      status: registration.status || 'Pending',
+      // Add any additional fields you want in the QR code
+      email: registration.email,
+      phone: registration.phone,
+      clan: registration.clan
+    };
+    
+    setShowBarcode(true);
+  };
 
   if (loading) {
     return (
@@ -57,11 +134,8 @@ export default function RegistrationDetailsScreen({ route, navigation }) {
       <View style={styles.centered}>
         <Ionicons name="alert-circle-outline" size={48} color={COLORS.secondaryBlue} />
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity 
-          style={styles.retryButton} 
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.retryButtonText}>Go Back</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchRegistrationDetails}>
+          <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -82,82 +156,237 @@ export default function RegistrationDetailsScreen({ route, navigation }) {
     );
   }
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{registration.event_name || 'Unnamed Event'}</Text>
-        <Text style={styles.date}>
-          Registered on: {new Date(registration.registration_date).toLocaleDateString()}
-        </Text>
-      </View>
+  if (showBarcode && ticketData) {
+    return (
+      <BarcodeComponent 
+        registration={ticketData} 
+        onClose={() => setShowBarcode(false)} 
+      />
+    );
+  }
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Registration Details</Text>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Status:</Text>
-          <Text style={styles.detailValue}>{registration.status || 'Pending'}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Event Date:</Text>
-          <Text style={styles.detailValue}>
-            {registration.event_date ? new Date(registration.event_date).toLocaleDateString() : 'Not specified'}
+  return (
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {/* Registration Header */}
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <Text style={styles.registrationId}>Registration #{registration.id}</Text>
+            <View style={[
+              styles.statusBadge, 
+              { backgroundColor: getStatusColor(registration.status) }
+            ]}>
+              <Text style={styles.statusText}>{registration.status || 'Pending'}</Text>
+            </View>
+          </View>
+          
+          <Text style={styles.registrationDate}>
+            Registered: {formatDate(registration.registration_date || registration.paymt_date)}
           </Text>
         </View>
-        {/* Add more registration details as needed */}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Registrants ({registrants.length})</Text>
-        {registrants.length === 0 ? (
-          <Text style={styles.emptyText}>No registrants found</Text>
-        ) : (
-          registrants.map((registrant, index) => (
-            <View key={registrant.id} style={styles.registrantCard}>
-              <Text style={styles.registrantName}>
-                {registrant.first_name} {registrant.last_name}
-              </Text>
-              <Text style={styles.registrantDetail}>Email: {registrant.email || 'N/A'}</Text>
-              <Text style={styles.registrantDetail}>Phone: {registrant.phone || 'N/A'}</Text>
-              {/* Add more registrant details as needed */}
+        
+        {/* Personal Information Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Personal Information</Text>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Full Name</Text>
+            <Text style={styles.infoValue}>
+              {registration.first_name} {registration.middle_name || ''} {registration.last_name}
+            </Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Email</Text>
+            <Text style={styles.infoValue}>{registration.email || 'N/A'}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Phone</Text>
+            <Text style={styles.infoValue}>{registration.phone || 'N/A'}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Location</Text>
+            <Text style={styles.infoValue}>
+              {registration.city || 'N/A'}, {registration.state || 'N/A'}
+            </Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Age Group</Text>
+            <Text style={styles.infoValue}>{registration.age_group || 'N/A'}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Clan</Text>
+            <Text style={styles.infoValue}>{registration.clan || 'N/A'}</Text>
+          </View>
+        </View>
+        
+        {/* Payment Information Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment Information</Text>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Payment Method</Text>
+            <Text style={styles.infoValue}>{registration.pymt_method || 'N/A'}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Payment Date</Text>
+            <Text style={styles.infoValue}>{formatDate(registration.paymt_date)}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Amount</Text>
+            <Text style={styles.infoValue}>{formatCurrency(registration.amount)}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Rate</Text>
+            <Text style={styles.infoValue}>{registration.rate || 'N/A'}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>On Tab</Text>
+            <Text style={styles.infoValue}>{registration.on_tab || 'N/A'}</Text>
+          </View>
+        </View>
+        
+        {/* Additional Information Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Additional Information</Text>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Check-in Status</Text>
+            <View style={styles.checkInContainer}>
+              <Text style={styles.infoValue}>{registration.checked_in || 'No'}</Text>
+              {registration.checked_in === 'Yes' && (
+                <Ionicons name="checkmark-circle" size={20} color={COLORS.successColor} style={styles.checkIcon} />
+              )}
             </View>
-          ))
-        )}
-      </View>
-    </ScrollView>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Comments</Text>
+            <Text style={styles.infoValue}>{registration.comments || 'No comments'}</Text>
+          </View>
+        </View>
+        
+        {/* Actions Section */}
+        <View style={styles.actionsContainer}>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity 
+              style={[styles.actionButton, { flex: 1, marginRight: 8 }]}
+              onPress={handleViewTicket}
+            >
+              <Ionicons name="qr-code-outline" size={20} color={COLORS.white} />
+              <Text style={styles.actionButtonText}>View Ticket</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.actionButton, { flex: 1, marginLeft: 8, backgroundColor: COLORS.successColor }]}
+              onPress={() => {
+                // Handle paid status update
+                Alert.alert(
+                  'Mark as Paid',
+                  'Are you sure you want to mark this registration as paid?',
+                  [
+                    {
+                      text: 'Cancel',
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Yes, Mark as Paid',
+                      onPress: async () => {
+                        try {
+                          setLoading(true);
+                          await registrationApi.updateRegistrant(registrationId, {
+                            ...registration,
+                            status: 'Paid',
+                            paymt_date: new Date().toISOString().split('T')[0]
+                          });
+                          
+                          // Refresh registration details
+                          fetchRegistrationDetails();
+                          Alert.alert('Success', 'Registration marked as paid successfully');
+                        } catch (error) {
+                          console.error('Error updating payment status:', error);
+                          Alert.alert('Error', 'Failed to update payment status');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }
+                    }
+                  ]
+                );
+              }}
+            >
+              <MaterialIcons name="payment" size={20} color={COLORS.white} />
+              <Text style={styles.actionButtonText}>Mark as Paid</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Add QR Code button */}
+          <TouchableOpacity 
+            style={[styles.actionButton, { marginTop: 12, backgroundColor: COLORS.primaryBlue }]}
+            onPress={handleGenerateQRCode}
+          >
+            <Ionicons name="qr-code" size={20} color={COLORS.white} />
+            <Text style={styles.actionButtonText}>Generate QR Code</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.lightBlue,
   },
-  centered: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: COLORS.white,
   },
   header: {
-    backgroundColor: COLORS.primaryBlue,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.white,
-    marginBottom: 8,
-  },
-  date: {
-    fontSize: 14,
-    color: COLORS.white,
-    opacity: 0.8,
-  },
-  section: {
+    backgroundColor: COLORS.white,
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightBlue,
+    borderBottomColor: COLORS.lightGray,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  registrationId: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.primaryBlue,
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  statusText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  registrationDate: {
+    fontSize: 14,
+    color: COLORS.gray,
+  },
+  section: {
+    backgroundColor: COLORS.white,
+    marginTop: 16,
+    padding: 20,
+    borderRadius: 8,
+    marginHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -165,37 +394,53 @@ const styles = StyleSheet.create({
     color: COLORS.primaryBlue,
     marginBottom: 16,
   },
-  detailRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
+  infoRow: {
+    marginBottom: 16,
   },
-  detailLabel: {
-    width: 100,
-    fontSize: 16,
-    color: COLORS.textDark,
-    fontWeight: '600',
-  },
-  detailValue: {
-    flex: 1,
-    fontSize: 16,
-    color: COLORS.textDark,
-  },
-  registrantCard: {
-    backgroundColor: COLORS.lightBlue,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-  },
-  registrantName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.primaryBlue,
-    marginBottom: 8,
-  },
-  registrantDetail: {
+  infoLabel: {
     fontSize: 14,
-    color: COLORS.textDark,
+    color: COLORS.gray,
     marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: COLORS.textDark,
+  },
+  checkInContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkIcon: {
+    marginLeft: 8,
+  },
+  actionsContainer: {
+    padding: 16,
+    marginBottom: 20,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    backgroundColor: COLORS.secondaryBlue,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 8,
+  },
+  actionButtonText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: COLORS.white,
   },
   loadingText: {
     marginTop: 12,
@@ -218,10 +463,5 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: COLORS.white,
     fontWeight: '600',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: COLORS.textDark,
-    fontStyle: 'italic',
   },
 });

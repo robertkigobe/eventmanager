@@ -112,7 +112,7 @@ export const registrationApi = {
   // Get a single registrant
   getRegistrant: async (registrantId) => {
     try {
-      const response = await apiClient.get(`/registrations/registrants/${registrantId}`);
+      const response = await apiClient.get(`/bbnac25/registrants/${registrantId}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching registrant ${registrantId}:`, error);
