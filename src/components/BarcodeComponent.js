@@ -268,20 +268,7 @@ export default function BarcodeComponent({ registration, onClose }) {
         </View>
         
         <View style={styles.actionsContainer}>
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={generateAndSharePDF}
-            disabled={generating}
-          >
-            {generating ? (
-              <ActivityIndicator size="small" color={COLORS.white} />
-            ) : (
-              <>
-                <Ionicons name="share-outline" size={20} color={COLORS.white} />
-                <Text style={styles.actionButtonText}>Share Ticket</Text>
-              </>
-            )}
-          </TouchableOpacity>
+        
           
           <TouchableOpacity 
             style={[styles.actionButton, { marginTop: 12, backgroundColor: COLORS.primaryBlue }]}

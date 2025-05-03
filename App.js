@@ -155,8 +155,8 @@ function DrawerNavigator() {
         name="Programming" 
         component={ProgramScreen} 
         options={{
-          title: 'Programming',
-          drawerLabel: 'Programming',
+          title: 'Convention Program',
+          drawerLabel: 'Convention Program',
           drawerIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="calendar-clock" size={size} color={color} />
           )
@@ -173,7 +173,7 @@ function DrawerNavigator() {
           )
         }}
       />
-      <Drawer.Screen 
+      {/* <Drawer.Screen 
         name="MyRegistrations" 
         component={MyRegistrationsScreen} 
         options={{
@@ -183,7 +183,7 @@ function DrawerNavigator() {
             <MaterialCommunityIcons name="ticket-confirmation" size={size} color={color} />
           )
         }}
-      />
+      /> */}
       <Drawer.Screen 
         name="Survey" 
         component={SurveyScreen} 
