@@ -36,7 +36,7 @@ export default function HomeScreen({ navigation }) {
           />
           <Text style={styles.welcomeTitle}>Welcome to</Text>
           <Text style={styles.conventionTitle}>BBNAC Convention 2025</Text>
-          <Text style={styles.conventionDate}>June 12-14, 2025</Text>
+          <Text style={styles.conventionDate}>May 23-25, 2025</Text>
         </View>
         
         {/* Convention Theme Banner */}
@@ -58,26 +58,27 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.speakersContainer}>
               <View style={styles.speakerItem}>
                 <Image 
-                  source={{uri: 'https://randomuser.me/api/portraits/men/32.jpg'}} 
+                  source={require('../../assets/kawuki.jpeg')} 
                   style={styles.speakerImage}
                 />
-                <Text style={styles.speakerName}>Dr. James Wilson</Text>
+                <Text style={styles.speakerName}>Mulongo Emmanuel Waswa</Text>
                 <Text style={styles.speakerRole}>BBNAC President</Text>
               </View>
               <View style={styles.speakerItem}>
                 <Image 
-                  source={{uri: 'https://randomuser.me/api/portraits/women/44.jpg'}} 
+                  source={require('../../assets/katikiro.jpeg')} 
                   style={styles.speakerImage}
                 />
-                <Text style={styles.speakerName}>Dr. Sarah Johnson</Text>
-                <Text style={styles.speakerRole}>Dean of Education</Text>
+                <Text style={styles.speakerName}>Katikkiro Peter Charles Mayiga
+                </Text>
+                <Text style={styles.speakerRole}>Prime Minister</Text>
               </View>
               <View style={styles.speakerItem}>
                 <Image 
-                  source={{uri: 'https://randomuser.me/api/portraits/men/76.jpg'}} 
+                  source={require('../../assets/kawuki.jpeg')} 
                   style={styles.speakerImage}
                 />
-                <Text style={styles.speakerName}>Dr. Samuel Green</Text>
+                <Text style={styles.speakerName}>Oweekitiibwa Joseph Kawuki</Text>
                 <Text style={styles.speakerRole}>Pastoral Counselor</Text>
               </View>
             </View>
@@ -92,22 +93,11 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.eventsContainer}>
               <TouchableOpacity style={styles.eventItem}>
                 <View style={styles.eventDayBadge}>
-                  <Text style={styles.eventDayText}>THU</Text>
-                </View>
-                <View style={styles.eventDetails}>
-                  <Text style={styles.eventTitle}>Opening Ceremony</Text>
-                  <Text style={styles.eventTime}>9:00 AM - Main Auditorium</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={COLORS.secondaryBlue} />
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.eventItem}>
-                <View style={styles.eventDayBadge}>
                   <Text style={styles.eventDayText}>FRI</Text>
                 </View>
                 <View style={styles.eventDetails}>
-                  <Text style={styles.eventTitle}>Digital Ministry Workshop</Text>
-                  <Text style={styles.eventTime}>9:00 AM - Room A</Text>
+                  <Text style={styles.eventTitle}>Private Meetings of Clans</Text>
+                  <Text style={styles.eventTime}>9:00 AM - Main Auditorium</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={COLORS.secondaryBlue} />
               </TouchableOpacity>
@@ -117,8 +107,19 @@ export default function HomeScreen({ navigation }) {
                   <Text style={styles.eventDayText}>SAT</Text>
                 </View>
                 <View style={styles.eventDetails}>
-                  <Text style={styles.eventTitle}>Closing Session</Text>
-                  <Text style={styles.eventTime}>2:00 PM - Main Auditorium</Text>
+                  <Text style={styles.eventTitle}>Ssaabasajja Kabaka's Message</Text>
+                  <Text style={styles.eventTime}>9:45 AM - Ballroom</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={COLORS.secondaryBlue} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.eventItem}>
+                <View style={styles.eventDayBadge}>
+                  <Text style={styles.eventDayText}>SUN</Text>
+                </View>
+                <View style={styles.eventDetails}>
+                  <Text style={styles.eventTitle}>BBANC General Annual Assembly</Text>
+                  <Text style={styles.eventTime}>2:00 PM - Ballroom</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={COLORS.secondaryBlue} />
               </TouchableOpacity>
@@ -145,8 +146,8 @@ export default function HomeScreen({ navigation }) {
                   style={styles.locationImage}
                 />
               </View>
-              <Text style={styles.locationName}>Baptist Convention Center</Text>
-              <Text style={styles.locationAddress}>123 Baptist Way, Nashville, TN 37203</Text>
+              <Text style={styles.locationName}>Omni Hotel</Text>
+              <Text style={styles.locationAddress}>450 Summer st, Boston, MA 02210</Text>
               <TouchableOpacity style={styles.mapButton}>
                 <Ionicons name="map" size={16} color={COLORS.white} />
                 <Text style={styles.mapButtonText}>Open in Maps</Text>

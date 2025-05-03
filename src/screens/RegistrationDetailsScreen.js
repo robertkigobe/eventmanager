@@ -328,14 +328,7 @@ export default function RegistrationDetailsScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
           
-          {/* Add QR Code button */}
-          <TouchableOpacity 
-            style={[styles.actionButton, { marginTop: 12, backgroundColor: COLORS.primaryBlue }]}
-            onPress={handleGenerateQRCode}
-          >
-            <Ionicons name="qr-code" size={20} color={COLORS.white} />
-            <Text style={styles.actionButtonText}>Generate QR Code</Text>
-          </TouchableOpacity>
+          
         </View>
       </ScrollView>
     </View>
