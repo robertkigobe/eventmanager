@@ -6,6 +6,7 @@ import {
   ImageBackground, 
   TouchableOpacity, 
   Image, 
+  Alert,
   ScrollView 
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -15,6 +16,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerI
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import screens
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -25,7 +27,12 @@ import ProgramScreen from './src/screens/ProgramScreen';
 import MyRegistrationsScreen from './src/screens/MyRegistrationsScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import RegistrationDetailsScreen from './src/screens/RegistrationDetailsScreen';
-import RegistrationListScreen from './src/screens/RegistrationListScreen'; 
+import RegistrationListScreen from './src/screens/RegistrationListScreen';
+import LoginScreen from './src/screens/LoginScreen';
+
+// Import auth services
+import { getCurrentUser, logout } from './src/utils/staticAuthService';
+
 // Create navigators
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -75,19 +82,64 @@ function CustomDrawerContent(props) {
 }
 
 // Authentication button component for the header
-function AuthButton({ navigation }) {
+function AuthButton({ navigation, user, setUser }) {
+  const [showUserInfo, setShowUserInfo] = useState(false);
+
   const handleAuthPress = () => {
-    // Handle authentication logic here
-    alert('Authentication feature will be implemented here');
+    if (user) {
+      // Toggle user info display
+      setShowUserInfo(!showUserInfo);
+    } else {
+      // Navigate to login screen
+      navigation.navigate('Login');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setUser(null);
+      setShowUserInfo(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert('Logout Failed', 'There was a problem logging out.');
+    }
   };
 
   return (
-    <TouchableOpacity 
-      style={styles.authButton} 
-      onPress={handleAuthPress}
-    >
-      <Ionicons name="person-circle" size={28} color="#ffffff" />
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity 
+        style={styles.authButton} 
+        onPress={handleAuthPress}
+      >
+        <Ionicons 
+          name={user ? "person-circle" : "person-circle-outline"} 
+          size={28} 
+          color="#ffffff" 
+        />
+      </TouchableOpacity>
+      
+      {/* User info popup */}
+      {showUserInfo && user && (
+        <View style={styles.userInfoPopup}>
+          <View style={styles.userInfoContent}>
+            <Text style={styles.userInfoName}>
+              {user.displayName || user.email.split('@')[0]}
+            </Text>
+            <Text style={styles.userInfoEmail}>{user.email}</Text>
+            
+            <TouchableOpacity 
+              style={styles.logoutButton}
+              onPress={handleLogout}
+            >
+              <Ionicons name="log-out-outline" size={16} color="#ffffff" />
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.popupArrow} />
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -101,7 +153,13 @@ function EnhancedAdminDashboardScreen({ navigation }) {
 }
 
 // Create the drawer navigator component
-function DrawerNavigator() {
+function DrawerNavigator({ user, setUser }) {
+  // Check if user is registration committee member
+  const isRegistrationCommittee = user && 
+    (user.email === 'registration1@bbnac.org' || 
+     user.email === 'registration2@bbnac.org' || 
+     user.email === 'registration3@bbnac.org');
+
   return (
     <Drawer.Navigator 
       initialRouteName="Home"
@@ -116,7 +174,7 @@ function DrawerNavigator() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        headerRight: () => <AuthButton navigation={navigation} />,
+        headerRight: () => <AuthButton navigation={navigation} user={user} setUser={setUser} />,
         drawerStyle: {
           backgroundColor: '#ffffff',
           width: 300,
@@ -195,17 +253,21 @@ function DrawerNavigator() {
           )
         }}
       />
-      <Drawer.Screen 
-        name="Registration Committee" 
-        component={EnhancedAdminDashboardScreen}
-        options={{
-          title: 'Registration Committee',
-          drawerLabel: 'Registration Committee',
-          drawerIcon: ({color, size}) => (
-            <MaterialIcons name="dashboard" size={size} color={color} />
-          )
-        }}
-      />
+      
+      {/* Conditionally render Registration Committee screen */}
+      {isRegistrationCommittee && (
+        <Drawer.Screen 
+          name="Registration Committee" 
+          component={EnhancedAdminDashboardScreen}
+          options={{
+            title: 'Registration Committee',
+            drawerLabel: 'Registration Committee',
+            drawerIcon: ({color, size}) => (
+              <MaterialIcons name="dashboard" size={size} color={color} />
+            )
+          }}
+        />
+      )}
     </Drawer.Navigator>
   );
 }
@@ -213,11 +275,15 @@ function DrawerNavigator() {
 // Main app component
 export default function App() {
   const [isReady, setIsReady] = useState(false);
+  const [user, setUser] = useState(null);
   
   useEffect(() => {
     async function prepare() {
       try {
-        // Pre-load fonts, make any API calls you need to do here
+        // Check if user is already logged in
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+        
         // Artificially delay for two seconds to simulate a slow loading
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (e) {
@@ -241,11 +307,26 @@ export default function App() {
     return null;
   }
 
-  // Use Stack navigator as the root navigator to handle both drawer and standalone screens
+  // Use Stack navigator as the root navigator
   return (
     <NavigationContainer onReady={onLayoutRootView}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Main" component={DrawerNavigator} />
+        <Stack.Screen name="Main">
+          {props => <DrawerNavigator {...props} user={user} setUser={setUser} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Login"
+          options={{
+            headerShown: true,
+            title: 'Login',
+            headerStyle: {
+              backgroundColor: '#003a70',
+            },
+            headerTintColor: '#ffffff',
+          }}
+        >
+          {props => <LoginScreen {...props} setUser={setUser} />}
+        </Stack.Screen>
         <Stack.Screen
           name="RegistrationDetails"
           component={RegistrationDetailsScreen}
@@ -326,6 +407,62 @@ const styles = StyleSheet.create({
   authButton: {
     marginRight: 15,
     padding: 5,
+  },
+  userInfoPopup: {
+    position: 'absolute',
+    top: 45,
+    right: 10,
+    width: 200,
+    zIndex: 1000,
+  },
+  popupArrow: {
+    position: 'absolute',
+    top: -10,
+    right: 10,
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#003a70',
+  },
+  userInfoContent: {
+    backgroundColor: '#003a70',
+    borderRadius: 8,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  userInfoName: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  userInfoEmail: {
+    color: '#e5f1f8',
+    fontSize: 14,
+    marginBottom: 15,
+  },
+  logoutButton: {
+    backgroundColor: '#0077c8',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    borderRadius: 4,
+  },
+  logoutText: {
+    color: '#ffffff',
+    marginLeft: 5,
+    fontWeight: '500',
   },
   // Drawer styles
   drawerContentContainer: {

@@ -4,8 +4,9 @@ const AUTH_USER_KEY = 'auth_user';
 
 // Static user credentials for authentication
 const VALID_CREDENTIALS = [
-  { email: 'admin@example.com', password: 'admin123', role: 'admin' },
-  { email: 'user@example.com', password: 'user123', role: 'user' }
+  { email: 'registration1@bbnac.org', password: 'registration0523', role: 'registration_committee' },
+  { email: 'registration2@bbnac.org', password: 'registration0524', role: 'registration_committee' },
+  { email: 'registration3@bbnac.org', password: 'registration0525', role: 'registration_committee' }
 ];
 
 // Login function
@@ -35,8 +36,15 @@ export const login = async (email, password) => {
 
 // Logout function
 export const logout = async () => {
-  await AsyncStorage.removeItem(AUTH_USER_KEY);
-  return true;
+
+
+  try {
+    await AsyncStorage.removeItem(AUTH_USER_KEY);
+    return true;
+  } catch (error) {
+    console.error('Error during logout:', error);
+    throw error;
+  }
 };
 
 // Get current user
@@ -60,6 +68,12 @@ export const isAuthenticated = async () => {
 export const isAdmin = async () => {
   const user = await getCurrentUser();
   return user !== null && user.role === 'admin';
+};
+
+// Check if user is registration committee member
+export const isRegistrationCommittee = async () => {
+  const user = await getCurrentUser();
+  return user !== null && user.role === 'registration_committee';
 };
 
 // Setup auth listener (simplified version)
