@@ -32,9 +32,11 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-barcode-scanner"
-    ],
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "b6aea087-b6f8-4c22-86ab-fae7c473603e"
+      }
+    }
   }
 }
