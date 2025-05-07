@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,19 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  Dimensions,Platform
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../constants/colors';
 
+const { width, height } = Dimensions.get('window');
+
 export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const webViewRef = useRef(null);
 
   // Function to handle returning to the homepage
   const returnToHomepage = () => {
@@ -35,6 +39,67 @@ export default function RegisterScreen({ navigation }) {
     setLoading(false);
     setError(true);
   };
+
+  // JavaScript to be injected into the webpage to make it responsive
+  const INJECTED_JAVASCRIPT = `
+    (function() {
+      // Remove any existing viewport meta tags
+      const existingMetas = document.querySelectorAll('meta[name="viewport"]');
+      existingMetas.forEach(meta => meta.remove());
+      
+      // Add our custom viewport meta tag
+      const meta = document.createElement('meta');
+      meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+      meta.setAttribute('name', 'viewport');
+      document.getElementsByTagName('head')[0].appendChild(meta);
+      
+      // Add more comprehensive CSS to ensure proper fitting
+      const style = document.createElement('style');
+      style.textContent = \`
+        body {
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow-x: hidden !important;
+        }
+        img, table, div, form, input, select, textarea {
+          max-width: 100% !important;
+          height: auto !important;
+          box-sizing: border-box !important;
+        }
+        iframe {
+          max-width: 100% !important;
+        }
+        /* Force single column layout on mobile */
+        @media (max-width: 768px) {
+          .row, .column, .col, [class*="col-"] {
+            width: 100% !important;
+            display: block !important;
+            float: none !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+            box-sizing: border-box !important;
+          }
+        }
+      \`;
+      document.getElementsByTagName('head')[0].appendChild(style);
+      
+      // Force redraw after a slight delay to ensure styles are applied
+      setTimeout(function() {
+        window.scrollTo(0, 0);
+        document.body.style.display = 'none';
+        setTimeout(function() { 
+          document.body.style.display = 'block';
+          // Notify the app that the content is ready
+          window.ReactNativeWebView.postMessage('Content adjusted');
+        }, 100);
+      }, 300);
+      
+      true;
+    })();
+  `;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -73,7 +138,7 @@ export default function RegisterScreen({ navigation }) {
                 setError(false);
                 setLoading(true);
                 // Force WebView to reload
-                this.webview?.reload();
+                webViewRef.current?.reload();
               }}
             >
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -82,7 +147,7 @@ export default function RegisterScreen({ navigation }) {
         )}
         
         <WebView
-          ref={ref => (this.webview = ref)}
+          ref={webViewRef}
           source={{ uri: 'https://www.bbnac.org/registration' }}
           style={styles.webView}
           onLoadStart={handleLoadStart}
@@ -92,6 +157,25 @@ export default function RegisterScreen({ navigation }) {
           renderLoading={() => null} // We're handling loading state ourselves
           javaScriptEnabled={true}
           domStorageEnabled={true}
+          scalesPageToFit={Platform.OS === 'android'} // Only needed for Android
+          automaticallyAdjustContentInsets={false}
+          contentInset={{ top: 0, left: 0, bottom: 0, right: 0 }}
+          scrollEnabled={true}
+          bounces={false}
+          showsHorizontalScrollIndicator={false}
+          injectedJavaScript={INJECTED_JAVASCRIPT}
+          originWhitelist={['*']}
+          userAgent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+          cacheEnabled={false}
+          incognito={true} // Use incognito mode to avoid caching issues
+          onMessage={(event) => {
+            console.log('Message from WebView:', event.nativeEvent.data);
+            // If needed, you can handle messages from the WebView here
+          }}
+          onNavigationStateChange={(navState) => {
+            // You can track navigation changes here if needed
+            console.log('Navigation state changed:', navState.url);
+          }}
         />
       </View>
       
@@ -139,9 +223,12 @@ const styles = StyleSheet.create({
   webViewContainer: {
     flex: 1,
     position: 'relative',
+    width: '100%',
   },
   webView: {
     flex: 1,
+    width: '100%',
+    backgroundColor: colors.white,
   },
   loadingContainer: {
     position: 'absolute',
