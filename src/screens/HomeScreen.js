@@ -5,9 +5,12 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity, 
-  Image 
+  Image,
+  Linking
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import ImageSlideshow from '../components/ImageSlideshow';
 
 // BBNAC color theme
 const COLORS = {
@@ -58,11 +61,11 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.speakersContainer}>
               <View style={styles.speakerItem}>
                 <Image 
-                  source={require('../../assets/kawuki.jpeg')} 
+                  source={require('../../assets/nsibirwa.jpeg')} 
                   style={styles.speakerImage}
                 />
-                <Text style={styles.speakerName}>Mulongo Emmanuel Waswa</Text>
-                <Text style={styles.speakerRole}>BBNAC President</Text>
+                <Text style={styles.speakerName}>Oweekitiibwa Robert Waggwa Nsibirwa</Text>
+                <Text style={styles.speakerRole}>Omumyuka Ow’Okubbiri owa Katikkiro,  Era Omuwanika.</Text>
               </View>
               <View style={styles.speakerItem}>
                 <Image 
@@ -71,7 +74,7 @@ export default function HomeScreen({ navigation }) {
                 />
                 <Text style={styles.speakerName}>Katikkiro Peter Charles Mayiga
                 </Text>
-                <Text style={styles.speakerRole}>Prime Minister</Text>
+                <Text style={styles.speakerRole}>Prime Minister: Buganda Kingdom, Keynote speaker</Text>
               </View>
               <View style={styles.speakerItem}>
                 <Image 
@@ -79,7 +82,7 @@ export default function HomeScreen({ navigation }) {
                   style={styles.speakerImage}
                 />
                 <Text style={styles.speakerName}>Oweekitiibwa Joseph Kawuki</Text>
-                <Text style={styles.speakerRole}>Pastoral Counselor</Text>
+                <Text style={styles.speakerRole}>Ministrer </Text>
               </View>
             </View>
           </View>
@@ -182,12 +185,12 @@ export default function HomeScreen({ navigation }) {
             
             <TouchableOpacity 
               style={styles.quickActionButton}
-              onPress={() => navigation.navigate('MyRegistrations')}
+              onPress={() => alert('Contact: robertkigobe@gmail.com')}
             >
               <View style={[styles.quickActionIcon, {backgroundColor: '#ff9800'}]}>
                 <MaterialCommunityIcons name="ticket-confirmation" size={24} color={COLORS.white} />
               </View>
-              <Text style={styles.quickActionText}>My Tickets</Text>
+              <Text style={styles.quickActionText}>Tech Support</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -202,30 +205,10 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
         
-        {/* News & Updates */}
+        {/* News & Updates - Changed to Image Slideshow */}
         <View style={styles.newsSection}>
-          <Text style={styles.sectionTitle}>News & Updates</Text>
-          <View style={styles.newsCard}>
-            <Text style={styles.newsDate}>May 15, 2025</Text>
-            <Text style={styles.newsTitle}>Early Bird Registration Now Open</Text>
-            <Text style={styles.newsExcerpt}>
-              Register before June 1st to take advantage of our early bird pricing and secure your spot at the convention.
-            </Text>
-            <TouchableOpacity style={styles.readMoreButton}>
-              <Text style={styles.readMoreText}>Read More</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.newsCard}>
-            <Text style={styles.newsDate}>May 10, 2025</Text>
-            <Text style={styles.newsTitle}>Special Hotel Rates for Attendees</Text>
-            <Text style={styles.newsExcerpt}>
-              We've partnered with several hotels near the convention center to offer special rates for BBNAC attendees.
-            </Text>
-            <TouchableOpacity style={styles.readMoreButton}>
-              <Text style={styles.readMoreText}>Read More</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.sectionTitle}>Event Gallery</Text>
+          <ImageSlideshow />
         </View>
         
         {/* Footer */}
@@ -342,14 +325,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   speakerName: {
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: 'bold',
     color: COLORS.textDark,
     textAlign: 'center',
     marginBottom: 2,
   },
   speakerRole: {
-    fontSize: 12,
+    fontSize: 10,
     color: COLORS.secondaryBlue,
     textAlign: 'center',
   },
